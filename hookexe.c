@@ -7,7 +7,8 @@
 
 #define MAX_LOADSTRING 100
 
-typedef void (__stdcall *pFunc)(void);				//function pointer to call sethook and removehook functions
+typedef void (__stdcall *pFunc)(void);					//function pointer to call sethook and removehook functions
+typedef BOOL (__stdcall *pSetCharMapFunc)(WPARAM *);	//function pointer to character map setting function
 
 // Global Variables:
 HINSTANCE hInst;								// current instance
@@ -19,6 +20,16 @@ ATOM				MyRegisterClass(HINSTANCE hInstance);
 BOOL				InitInstance(HINSTANCE, int);
 LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
+
+BOOL LoadMapping(pSetCharMapFunc ptrSetCharMapFunc)
+{
+	WPARAM charmap[256];
+	int i;
+	for (i = 0; i < sizeof(charmap)/sizeof(charmap[1]); i++)
+		charmap[i] = i;
+	charmap['b'] = 'B';
+	return ptrSetCharMapFunc(charmap);
+}
 
 int APIENTRY WinMain(HINSTANCE hInstance,
                      HINSTANCE hPrevInstance,
@@ -135,6 +146,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	static HMODULE hmodDll = NULL;
 	static pFunc ptrFunc;
+	static pSetCharMapFunc ptrSetCharMapFunc;
 
 	int wmId;
 	PAINTSTRUCT ps;
@@ -154,6 +166,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					hmodDll = LoadLibrary("hookdll.dll");
 					if(hmodDll == NULL)
 						return 0;
+
+					ptrSetCharMapFunc = (pSetCharMapFunc)GetProcAddress(hmodDll,"SetCharMap");
+					if(ptrSetCharMapFunc == NULL)
+						return 0;
+					LoadMapping(ptrSetCharMapFunc);
+
 					ptrFunc = (pFunc)GetProcAddress(hmodDll,"SetHook");			//get the address of SetHook function
 					if(ptrFunc == NULL)
 						return 0;

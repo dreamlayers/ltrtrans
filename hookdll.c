@@ -52,7 +52,6 @@ static void init_shmem(void)
 		int i;
 		for (i = 0; i < SHMEMSIZE/sizeof(*ltrmap); i++)
 			ltrmap[i] = i;
-		ltrmap['a'] = 'A';
 	}
 }
 
@@ -120,4 +119,15 @@ void __stdcall RemoveHook()
 	if(hkKey !=NULL)
 		UnhookWindowsHookEx(hkKey);
 	hkKey = NULL;
+}
+
+//set character map
+BOOL _stdcall SetCharMap(WPARAM *newmap)
+{
+	if (ltrmap == NULL) {
+		return FALSE;
+	} else {
+		CopyMemory(ltrmap, newmap, SHMEMSIZE);
+		return TRUE;
+	}
 }
