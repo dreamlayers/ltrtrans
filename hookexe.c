@@ -23,10 +23,16 @@ LRESULT CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
 
 BOOL LoadMapping(pSetCharMapFunc ptrSetCharMapFunc)
 {
-	WPARAM charmap[256];
+	UINT32 charmap[256];
 	int i;
 	for (i = 0; i < sizeof(charmap)/sizeof(charmap[1]); i++)
 		charmap[i] = i;
+	// Translate to math italic letters
+	for (i = 'a'; i <= 'z'; i++)
+		charmap[i] = i - 'a' + 0x1D44E;
+	for (i = 'A'; i <= 'Z'; i++)
+		charmap[i] = i - 'A' + 0x1D434;
+
 	charmap['b'] = 'B';
 	return ptrSetCharMapFunc(charmap);
 }
