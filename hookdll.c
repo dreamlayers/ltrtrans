@@ -110,7 +110,9 @@ LRESULT CALLBACK procCharMsg(int nCode,WPARAM wParam, LPARAM lParam)		//this is 
 void __stdcall SetHook()
 {
 	if(hkKey == NULL)
-		hkKey = SetWindowsHookEx(WH_GETMESSAGE,procCharMsg,hInstHookDll,0);
+		// Unicode functionr equired to pass Unicode characters.
+		// Otherwise they would be masked to 8 bits.
+		hkKey = SetWindowsHookExW(WH_GETMESSAGE,procCharMsg,hInstHookDll,0);
 }
 
 //remove the hook
